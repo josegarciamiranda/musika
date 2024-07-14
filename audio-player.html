@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Audio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #audio-player {
+            margin: 20px 0;
+            width: 100%;
+        }
+        #playlist {
+            list-style: none;
+            padding: 0;
+        }
+        #playlist li {
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+        }
+        #playlist li:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Lista de Reproducción</h2>
+    <audio id="audio-player" controls>
+        <source id="audio-source" src="audio1.mp3" type="audio/mp3">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+    <ul id="playlist">
+        <li data-src="Rebel Yell - Remastered 1999 - Billy Idol.mp3">Audio 1</li>
+        <li data-src="Sharp Dressed Man 2008 Remaster - Zz Top.mp3">Audio 2</li>
+        <li data-src="Aleks Syntek - Tú Necesitas OV7.mp3">Audio 2</li>
+
+<!-- Añade más elementos de lista según sea necesario -->
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var player = document.getElementById('audio-player');
+            var source = document.getElementById('audio-source');
+            var playlist = document.getElementById('playlist');
+            var tracks = playlist.getElementsByTagName('li');
+
+            function playTrack(track) {
+                var src = track.getAttribute('data-src');
+                source.src = src;
+                player.load();
+                player.play();
+            }
+
+            for (var i = 0; i < tracks.length; i++) {
+                tracks[i].addEventListener('click', function(e) {
+                    playTrack(e.target);
+                });
+            }
+
+            // Reproduce la primera pista por defecto
+            playTrack(tracks[0]);
+        });
+    </script>
+</body>
+</html>
