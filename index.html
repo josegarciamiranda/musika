@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Audio</title>
+</head>
+<body>
+    <audio id="audioPlayer" controls autoplay></audio>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const streamUrl = 'https://c26.radioboss.fm:8581/stream';
+        const fallbackAudio = 'Lovefool.mp3'; // Asegúrate de que este archivo esté en la misma carpeta que tu HTML
+
+        let isPlayingStream = true;
+
+        function playStream() {
+            audioPlayer.src = streamUrl;
+            audioPlayer.load();
+            audioPlayer.play().catch(error => {
+                console.error('Error al reproducir el stream:', error);
+                isPlayingStream = false;
+                playFallback();
+            });
+        }
+
+        function playFallback() {
+            audioPlayer.src = fallbackAudio;
+            audioPlayer.load();
+            audioPlayer.play().catch(error => {
+                console.error('Error al reproducir el archivo local:', error);
+            });
+        }
+
+        audioPlayer.addEventListener('error', () => {
+            console.error('Error en el reproductor de audio. Intentando cambiar a la pista de respaldo.');
+            isPlayingStream = false;
+            playFallback();
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            if (!isPlayingStream) {
+                playFallback();
+            }
+        });
+
+        // Verificar la conexión a Internet
+        function checkConnection() {
+            if (navigator.onLine) {
+                if (!isPlayingStream) {
+                    playStream();
+                }
+            } else {
+                isPlayingStream = false;
+                playFallback();
+            }
+        }
+
+        // Escuchar eventos de conexión
+        window.addEventListener('online', checkConnection);
+        window.addEventListener('offline', checkConnection);
+
+        // Iniciar la reproducción con el stream
+        playStream();
+    </script>
+</body>
+</html>
