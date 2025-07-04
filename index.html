@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reproductor de Música Ambiental - Beta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            color: #333;
+        }
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            padding: 25px 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+        }
+        .player {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+        h2 {
+            margin-bottom: 8px;
+            font-size: 2.2em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+        audio {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+            gap: 15px;
+        }
+        .controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .controls button:active {
+            transform: translateY(0);
+        }
+
+        .playback-mode-controls, .ad-frequency-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .playback-mode-controls button, .ad-frequency-control button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .playback-mode-controls button:hover, .ad-frequency-control button:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+        }
+        .playback-mode-controls button.active {
+            background-color: #28a745;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+        }
+        #adStatusIndicator {
+            padding: 8px 15px;
+            background-color: #ffe0b2;
+            color: #e65100;
+            border-radius: 15px;
+            margin-top: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(230, 81, 0, 0.2);
+        }
+
+        .ad-frequency-control label {
+            font-size: 14px;
+            color: #555;
+        }
+        .ad-frequency-control input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 60px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 25px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #007bff, #00c6ff);
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555;
+            padding: 0 5px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 10px;
+            padding: 0 10px;
+        }
+        .volume-container span {
+            font-size: 14px;
+            color: #555;
+        }
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 8px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.8;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 4px;
+        }
+        .volume-slider:hover {
+            opacity: 1;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4);
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4);
+        }
+
+        .playlist-selector-section {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .playlist-selector-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .playlist-selector-section select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2C197.9c-3.2%2C3.2-8.3%2C3.2-11.6%2C0L146.2%2C71.3L17.1%2C197.9c-3.2%2C3.2-8.3%2C3.2-11.6%2C0l-5.8-5.8c-3.2-3.2-3.2-8.3%2C0-11.6l139-139c3.2-3.2%2C8.3-3.2%2C11.6%2C0l139%2C139c3.2%2C3.2%2C3.2%2C8.3%2C0%2C11.6L287%2C197.9z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 15px auto;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .playlist-selector-section > div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .schedule-control-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+        .schedule-control-btn:hover {
+            background-color: #218838;
+        }
+
+        .current-scheduled-playlist {
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        .playlist-section {
+            width: 100%;
+            text-align: left;
+        }
+        .playlist-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .song-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background-color: #fafafa;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+        .song-list li {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .song-list li:last-child {
+            border-bottom: none;
+        }
+        .song-list li:hover {
+            background-color: #f5f5f5;
+            transform: translateX(3px);
+        }
+        .song-list .song-title {
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+        .song-list .song-artist {
+            font-size: 0.9em;
+            color: #888;
+        }
+        .song-list li.active {
+            background-color: #e0f7fa;
+            color: #007bff;
+            border-left: 5px solid #007bff;
+            padding-left: 15px;
+        }
+        .song-list li.active .song-title,
+        .song-list li.active .song-artist {
+            color: #0056b3;
+        }
+
+        /* ESTILOS PARA EL ADMINISTRADOR DE HORARIOS */
+        .schedule-admin-section {
+            width: 100%;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            text-align: left;
+        }
+        .schedule-admin-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.03);
+        }
+        .schedule-list li {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .schedule-list li:last-child {
+            border-bottom: none;
+        }
+        .schedule-list label {
+            font-size: 14px;
+            color: #666;
+            flex-shrink: 0;
+        }
+        .schedule-list input[type="time"],
+        .schedule-list select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 90px;
+            box-sizing: border-box;
+        }
+        .schedule-list select {
+            flex: 2;
+            min-width: 150px;
+        }
+        .schedule-list .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            flex-shrink: 0;
+        }
+        .schedule-list .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .add-schedule-btn {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+            display: block;
+            width: 100%;
+        }
+        .add-schedule-btn:hover {
+            background-color: #138496;
+        }
+
+        .branding {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+        }
+
+        /* --- MEDIA QUERIES PARA RESPONSIVE DESIGN --- */
+        @media (max-width: 768px) {
+            .player-container {
+                padding: 15px 20px;
+                gap: 15px;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            p {
+                font-size: 1em;
+            }
+            .controls {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .controls button {
+                padding: 10px 15px;
+                font-size: 14px;
+                min-width: unset;
+                flex-grow: 1;
+            }
+            .playback-mode-controls, .ad-frequency-control {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .playback-mode-controls button, .ad-frequency-control button {
+                width: 100%;
+                padding: 10px;
+            }
+            .ad-frequency-control {
+                text-align: center;
+            }
+            .ad-frequency-control label, .ad-frequency-control input, .ad-frequency-control button {
+                width: 100%;
+            }
+            .volume-container {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .volume-slider {
+                width: 100%;
+            }
+            .song-list li {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 15px;
+            }
+            .song-list .song-title {
+                font-size: 1em;
+            }
+            .song-list .song-artist {
+                font-size: 0.85em;
+                margin-top: 3px;
+            }
+            .schedule-list li {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .schedule-list label {
+                width: 100%;
+                text-align: center;
+            }
+            .schedule-list input[type="time"],
+            .schedule-list select {
+                width: 100%;
+                min-width: unset;
+            }
+            .schedule-list .delete-btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .player-container {
+                padding: 10px 15px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            p {
+                font-size: 0.9em;
+            }
+            .controls button {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            .ad-frequency-control label {
+                font-size: 13px;
+            }
+            .ad-frequency-control input[type="number"] {
+                width: 50px;
+            }
+            .playlist-selector-section select {
+                font-size: 14px;
+                padding: 10px;
+            }
+            .current-scheduled-playlist {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="player">
+            <h2 id="titulo">Título de la Canción</h2>
+            <p id="artista">Artista</p>
+            
+            <audio id="audio" autoplay onended="siguiente()">
+                <source src="" type="audio/mpeg" />
+                Tu navegador no soporta audio.
+            </audio>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-info">
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
+            </div>
+
+            <div class="controls">
+                <button onclick="anterior()"><i class="fas fa-backward"></i> Anterior</button>
+                <button id="playPauseBtn" onclick="togglePlay()"><i class="fas fa-play"></i> Reproducir</button>
+                <button onclick="siguiente()"><i class="fas fa-forward"></i> Siguiente</button>
+            </div>
+
+            <div class="volume-container">
+                <span><i class="fas fa-volume-up"></i> Volumen:</span>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+            </div>
+
+            <div class="playback-mode-controls">
+                <button id="sequentialBtn" onclick="setPlaybackMode('sequential')">
+                    <i class="fas fa-arrows-alt-h"></i> Secuencial
+                </button>
+                <button id="shuffleBtn" onclick="setPlaybackMode('shuffle')">
+                    <i class="fas fa-random"></i> Aleatorio
+                </button>
+            </div>
+
+            <div class="ad-frequency-control" style="margin-top: 20px; text-align: center;">
+                <label for="adIntervalInput">Anuncio cada <span id="currentAdInterval">3</span> canciones:</label>
+                <input type="number" id="adIntervalInput" min="1" value="3">
+                <button id="setAdIntervalBtn" style="background-color: #007bff;">Aplicar</button>
+            </div>
+
+            <div id="adStatusIndicator" style="display: none;">
+                <i class="fas fa-bullhorn"></i> ANUNCIO EN CURSO
+            </div>
+
+        </div>
+
+        <div class="playlist-selector-section">
+            <label for="playlistSelector">Seleccionar Playlist:</label>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <select id="playlistSelector" onchange="cambiarPlaylist(this.value)">
+                    <option value="Clásicos de Siempre">Clásicos de Siempre</option>
+                    <option value="Éxitos en Español">Éxitos en Español</option>
+                    <option value="Pop Actual">Pop Actual</option>
+                </select>
+                <button class="schedule-control-btn" onclick="volverAHorario()">Volver a Horario</button>
+            </div>
+        </div>
+
+        <div id="scheduledPlaylistInfo" class="current-scheduled-playlist">
+        </div>
+
+        <div class="playlist-section">
+            <h3>Canciones de la Playlist</h3>
+            <ul id="songList" class="song-list">
+            </ul>
+        </div>
+
+        <div class="schedule-admin-section">
+            <h3>Administrar Horarios de Playlists</h3>
+            <ul id="scheduleList" class="schedule-list">
+            </ul>
+            <button class="add-schedule-btn" onclick="añadirNuevaFranja()">Añadir Nueva Franja</button>
+        </div>
+
+    </div>
+
+    <div class="branding">
+        Plataforma piloto de música ambiental
+    </div>
+
+    <script>
+        // Mapeo de nombres de playlist a sus archivos JSON
+        const playlistPaths = {
+            "Clásicos de Siempre": "data/clasicos.json",
+            "Éxitos en Español": "data/espanol.json",
+            "Pop Actual": "data/pop-actual.json" // <--- NUEVA LÍNEA AÑADIDA AQUÍ
+            // AÑADE AQUÍ TUS OTRAS PLAYLISTS CUANDO LAS TENGAS LISTAS, por ejemplo:
+            // "Rock Clásico": "data/rock_clasico.json",
+            // "Bandas Sonoras": "data/bandas_sonoras.json"
+        };
+
+        // RUTAS DE ANUNCIOS - ¡APUNTANDO A LA CARPETA 'anuncios/'!
+        const anuncios = [
+            "anuncios/anuncio_kasimu_1.mp3",
+            "anuncios/anuncio_patrocinador_a.mp3",
+            "anuncios/anuncio_promocion.mp3"
+        ];
+        
+        let AD_INTERVAL_SONGS = 3;
+        let songsSinceLastAd = 0;
+        let currentAdIndex = 0;
+        let isPlayingAd = false;
+
+
+        let horarioProgramado = [];
+        const LOCAL_STORAGE_KEY_SCHEDULE = "musicPlayerSchedule";
+        const LOCAL_STORAGE_KEY_PLAYBACK_MODE = "musicPlayerPlaybackMode";
+        const LOCAL_STORAGE_KEY_AD_INTERVAL = "musicPlayerAdInterval";
+
+        let currentPlaylistName;
+        let cancionesActuales = []; // Ahora se cargará dinámicamente
+        let actual = 0;
+        let esReproduccionManual = false;
+        let isShuffleMode = false; 
+        let shuffledPlaylistIndices = []; 
+
+        const audio = document.getElementById("audio");
+        const titulo = document.getElementById("titulo");
+        const artista = document.getElementById("artista");
+        const playPauseBtn = document.getElementById("playPauseBtn");
+        const songListElement = document.getElementById("songList");
+        const playlistSelector = document.getElementById("playlistSelector");
+
+        const progressBar = document.getElementById("progressBar");
+        const progressContainer = document.getElementById("progressContainer");
+        const currentTimeSpan = document.getElementById("currentTime");
+        const durationTimeSpan = document.getElementById("durationTime");
+        const volumeSlider = document.getElementById("volumeSlider");
+        const scheduledPlaylistInfo = document.getElementById("scheduledPlaylistInfo");
+        const scheduleListElement = document.getElementById("scheduleList");
+
+        const sequentialBtn = document.getElementById("sequentialBtn");
+        const shuffleBtn = document.getElementById("shuffleBtn");
+
+        const adIntervalInput = document.getElementById("adIntervalInput");
+        const currentAdIntervalSpan = document.getElementById("currentAdInterval");
+        const setAdIntervalBtn = document.getElementById("setAdIntervalBtn");
+        const adStatusIndicator = document.getElementById("adStatusIndicator");
+
+
+        // --- Funciones del reproductor ---
+        function cargarPista(index, autoPlay = false) {
+            console.log(`[cargarPista] Llamada. Index: ${index}, AutoPlay: ${autoPlay}, isPlayingAd: ${isPlayingAd}`);
+            
+            // Si la playlist actual está vacía y no estamos en un anuncio, manejar el caso
+            if (!cancionesActuales || cancionesActuales.length === 0) {
+                if (!isPlayingAd) {
+                    titulo.textContent = "No hay canciones disponibles";
+                    artista.textContent = "Por favor, selecciona una playlist o carga una.";
+                    audio.pause();
+                    audio.src = "";
+                    updatePlayPauseButton();
+                    songListElement.innerHTML = '<li><span class="song-title">No hay canciones para mostrar.</span></li>'; 
+                    progressBar.style.width = '0%';
+                    currentTimeSpan.textContent = '0:00';
+                    durationTimeSpan.textContent = '0:00';
+                    console.warn("No hay canciones en la playlist actual.");
+                    return;
+                }
+            }
+
+            actual = index; 
+            let pistaACargar;
+
+            if (isPlayingAd) { 
+                titulo.textContent = "Anuncio Publicitario";
+                artista.textContent = "¡Atención al mensaje!";
+                songListElement.innerHTML = '<li><span class="song-title">Publicidad en curso...</span></li>'; 
+                updatePlayPauseButton();
+                progressBar.style.width = '0%';
+                currentTimeSpan.textContent = '0:00';
+                durationTimeSpan.textContent = '0:00';
+                // La fuente del audio ya se ha establecido en reproducirAnuncio()
+                return;
+            }
+            
+            adStatusIndicator.style.display = 'none'; // Si no estamos en modo anuncio, ocultar el indicador
+
+            if (isShuffleMode && shuffledPlaylistIndices.length > 0) {
+                const realIndex = shuffledPlaylistIndices[actual];
+                pistaACargar = cancionesActuales[realIndex];
+                console.log(`[cargarPista] Modo aleatorio. Índice real: ${realIndex}, Pista: ${pistaACargar ? pistaACargar.titulo : 'N/A'}`);
+            } else if (cancionesActuales && cancionesActuales.length > 0 && index >= 0 && index < cancionesActuales.length) {
+                pistaACargar = cancionesActuales[actual];
+                console.log(`[cargarPista] Modo secuencial. Pista: ${pistaACargar ? pistaACargar.titulo : 'N/A'}`);
+            } else {
+                titulo.textContent = "No hay canciones disponibles"; // Esto solo debería ocurrir si cancionesActuales se vuelve vacío
+                artista.textContent = "";
+                audio.pause();
+                audio.src = "";
+                updatePlayPauseButton();
+                songListElement.innerHTML = '<li><span class="song-title">No hay canciones para mostrar.</span></li>'; 
+                progressBar.style.width = '0%';
+                currentTimeSpan.textContent = '0:00';
+                durationTimeSpan.textContent = '0:00';
+                console.warn("No hay canciones en la playlist actual o el índice es inválido (segunda verificación).");
+                return;
+            }
+
+            audio.src = pistaACargar.archivo;
+            titulo.textContent = pistaACargar.titulo;
+            artista.textContent = pistaACargar.artista;
+            audio.load();
+
+            if (autoPlay) {
+                audio.play().catch(e => {
+                    console.error("Error al intentar reproducir (cargarPista):", e);
+                });
+            }
+            updatePlayPauseButton();
+            generarListaCanciones();
+            highlightCurrentSong();
+            progressBar.style.width = '0%';
+            currentTimeSpan.textContent = '0:00';
+            durationTimeSpan.textContent = '0:00';
+        }
+
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play().catch(e => {
+                    console.error("Error al intentar reproducir (togglePlay):", e);
+                    alert("No se pudo reproducir la pista.");
+                });
+            } else {
+                audio.pause();
+            }
+            updatePlayPauseButton();
+        }
+
+        function siguiente() {
+            console.log(`[siguiente] Llamada. isPlayingAd: ${isPlayingAd}`);
+
+            if (isPlayingAd) {
+                isPlayingAd = false;
+                adStatusIndicator.style.display = 'none'; // Asegurar que el indicador se oculte
+
+                // Lógica para avanzar a la *siguiente* canción después del anuncio
+                if (isShuffleMode) {
+                    actual = (actual + 1) % shuffledPlaylistIndices.length;
+                    console.log(`[siguiente] Anuncio terminado (aleatorio). Siguiente índice shuffled: ${actual}`);
+                } else {
+                    actual = (actual + 1) % cancionesActuales.length;
+                    console.log(`[siguiente] Anuncio terminado (secuencial). Siguiente índice: ${actual}`);
+                }
+                
+                songsSinceLastAd = 0; // REINICIAR el contador de canciones post-anuncio
+                cargarPista(actual, true); // Cargar la nueva "siguiente" canción
+                console.log("[siguiente] Anuncio terminado. Volviendo a la playlist y avanzando a la siguiente canción.");
+                return;
+            }
+
+            // Si llegamos aquí, NO estábamos reproduciendo un anuncio. Esto es una canción normal que terminó.
+            songsSinceLastAd++;
+            console.log(`[siguiente] Canciones desde último anuncio: ${songsSinceLastAd} (AD_INTERVAL_SONGS: ${AD_INTERVAL_SONGS})`);
+
+            if (songsSinceLastAd >= AD_INTERVAL_SONGS && anuncios.length > 0) {
+                console.log("[siguiente] Intervalo de anuncio alcanzado. Reproduciendo anuncio.");
+                reproducirAnuncio();
+                // No reiniciar songsSinceLastAd aquí, se reinicia cuando el anuncio *termina* y vuelve a la playlist
+                return; 
+            }
+            
+            if (!cancionesActuales || cancionesActuales.length === 0) {
+                console.warn("[siguiente] No hay canciones en la playlist actual.");
+                return;
+            }
+
+            if (isShuffleMode) {
+                actual = (actual + 1) % shuffledPlaylistIndices.length;
+                console.log(`[siguiente] Modo aleatorio. Siguiente índice shuffled: ${actual}`);
+                cargarPista(actual, true);
+            } else {
+                actual = (actual + 1) % cancionesActuales.length;
+                console.log(`[siguiente] Modo secuencial. Siguiente índice: ${actual}`);
+                cargarPista(actual, true);
+            }
+        }
+
+        function anterior() {
+            console.log(`[anterior] Llamada. isPlayingAd: ${isPlayingAd}`);
+            if (isPlayingAd) { 
+                isPlayingAd = false;
+                audio.pause();
+                adStatusIndicator.style.display = 'none';
+                console.log("[anterior] Deteniendo anuncio, volviendo a la playlist.");
+                // Al ir hacia atrás desde un anuncio, volvemos a la canción anterior en la playlist
+                if (isShuffleMode) {
+                    actual = (actual - 1 + shuffledPlaylistIndices.length) % shuffledPlaylistIndices.length;
+                } else { 
+                    actual = (actual - 1 + cancionesActuales.length) % cancionesActuales.length;
+                }
+                songsSinceLastAd = 0; // Reiniciar el contador de anuncios para evitar un anuncio inmediato
+                cargarPista(actual, true); 
+                return;
+            }
+
+            if (!cancionesActuales || cancionesActuales.length === 0) {
+                console.warn("[anterior] No hay canciones en la playlist actual.");
+                return;
+            }
+
+            if (isShuffleMode) {
+                actual = (actual - 1 + shuffledPlaylistIndices.length) % shuffledPlaylistIndices.length;
+                console.log(`[anterior] Modo aleatorio. Anterior índice shuffled: ${actual}`);
+                cargarPista(actual, true);
+            } else { 
+                actual = (actual - 1 + cancionesActuales.length) % cancionesActuales.length;
+                console.log(`[anterior] Modo secuencial. Anterior índice: ${actual}`);
+                cargarPista(actual, true);
+            }
+            songsSinceLastAd = 0; 
+            console.log("[anterior] Reiniciando contador de anuncios al ir hacia atrás.");
+        }
+
+        function updatePlayPauseButton() {
+            const playIcon = playPauseBtn.querySelector('.fa-play');
+            const pauseIcon = playPauseBtn.querySelector('.fa-pause');
+            if (audio.paused) {
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Reproducir';
+            } else {
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+            }
+        }
+
+        // --- Funciones de Playlist y UI ---
+        function generarListaCanciones() {
+            songListElement.innerHTML = '';
+            if (isPlayingAd) {
+                songListElement.innerHTML = '<li><span class="song-title">Publicidad en curso...</span></li>';
+            } else if (cancionesActuales && cancionesActuales.length > 0) { 
+                cancionesActuales.forEach((cancion, index) => {
+                    const li = document.createElement('li');
+                    li.dataset.originalIndex = index; 
+                    li.innerHTML = `
+                        <span class="song-title">${cancion.titulo}</span>
+                        <span class="song-artist">${cancion.artista}</span>
+                    `;
+                    li.onclick = () => {
+                        esReproduccionManual = true; // Indica que el usuario seleccionó manualmente
+                        cargarPista(index, true); // Carga la pista y la reproduce
+                        songsSinceLastAd = 0; // Reinicia el contador de anuncios al seleccionar una canción
+                        console.log("[generarListaCanciones] Reiniciando contador de anuncios al seleccionar una canción manualmente.");
+                    };
+                    songListElement.appendChild(li);
+                });
+            } else {
+                songListElement.innerHTML = '<li><span class="song-title">No hay canciones para mostrar.</span></li>';
+            }
+        }
+
+        function highlightCurrentSong() {
+            const listItems = songListElement.querySelectorAll('li');
+            listItems.forEach((item, idx) => {
+                const originalIndex = parseInt(item.dataset.originalIndex);
+                // Si estamos en modo aleatorio, 'actual' es el índice dentro de shuffledPlaylistIndices
+                // Necesitamos el índice original para comparar con el dataset.originalIndex
+                const currentSongOriginalIndex = isShuffleMode ? shuffledPlaylistIndices[actual] : actual;
+
+                if (originalIndex === currentSongOriginalIndex) {
+                    item.classList.add('active');
+                    // Hacer scroll para que la canción actual sea visible
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // --- Funciones de anuncios ---
+        function reproducirAnuncio() {
+            if (anuncios.length === 0) {
+                console.log("No hay anuncios configurados.");
+                siguiente(); // Continúa con la siguiente canción si no hay anuncios
+                return;
+            }
+
+            isPlayingAd = true;
+            adStatusIndicator.style.display = 'flex'; // Mostrar el indicador de anuncio
+            console.log(`Reproduciendo anuncio: ${anuncios[currentAdIndex]}`);
+            audio.src = anuncios[currentAdIndex];
+            titulo.textContent = "Anuncio Publicitario";
+            artista.textContent = "¡Atención al mensaje!";
+            audio.load();
+            audio.play().catch(e => {
+                console.error("Error al reproducir anuncio:", e);
+                isPlayingAd = false; // Si falla el anuncio, volver al modo normal
+                adStatusIndicator.style.display = 'none';
+                siguiente(); // Y tratar de reproducir la siguiente canción
+            });
+            updatePlayPauseButton();
+            generarListaCanciones(); // Actualizar la lista para mostrar "Publicidad en curso"
+
+            // Avanzar al siguiente anuncio para la próxima vez
+            currentAdIndex = (currentAdIndex + 1) % anuncios.length;
+        }
+
+        // --- Manejo de la barra de progreso ---
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const progressPercent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                currentTimeSpan.textContent = formatTime(audio.currentTime);
+                durationTimeSpan.textContent = formatTime(audio.duration);
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            if (isPlayingAd) return; // No permitir buscar en anuncios
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // --- Control de Volumen ---
+        volumeSlider.addEventListener('input', () => {
+            audio.volume = volumeSlider.value;
+            localStorage.setItem('musicPlayerVolume', volumeSlider.value);
+        });
+
+        // Cargar volumen guardado
+        function loadVolume() {
+            const savedVolume = localStorage.getItem('musicPlayerVolume');
+            if (savedVolume !== null) {
+                volumeSlider.value = savedVolume;
+                audio.volume = savedVolume;
+            }
+        }
+
+        // --- Modos de Reproducción (Secuencial/Aleatorio) ---
+        function setPlaybackMode(mode) {
+            if (mode === 'shuffle' && !isShuffleMode) {
+                isShuffleMode = true;
+                shufflePlaylist();
+                console.log("Modo Aleatorio Activado.");
+            } else if (mode === 'sequential' && isShuffleMode) {
+                isShuffleMode = false;
+                console.log("Modo Secuencial Activado.");
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY_PLAYBACK_MODE, isShuffleMode ? 'shuffle' : 'sequential');
+            updatePlaybackModeButtons();
+            // Si el modo cambia, recargar la pista actual en el nuevo orden/estado
+            if (cancionesActuales.length > 0) {
+                cargarPista(actual, audio.paused ? false : true); // Mantener el estado de reproducción
+            }
+        }
+
+        function shufflePlaylist() {
+            shuffledPlaylistIndices = Array.from({ length: cancionesActuales.length }, (_, i) => i);
+            for (let i = shuffledPlaylistIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledPlaylistIndices[i], shuffledPlaylistIndices[j]] = [shuffledPlaylistIndices[j], shuffledPlaylistIndices[i]];
+            }
+            actual = 0; // Reiniciar el índice actual al inicio de la nueva secuencia aleatoria
+            console.log("Playlist barajada:", shuffledPlaylistIndices);
+        }
+
+        function updatePlaybackModeButtons() {
+            sequentialBtn.classList.remove('active');
+            shuffleBtn.classList.remove('active');
+            if (isShuffleMode) {
+                shuffleBtn.classList.add('active');
+            } else {
+                sequentialBtn.classList.add('active');
+            }
+        }
+
+        // --- Carga y Cambio de Playlist ---
+        function populatePlaylistSelector() {
+            playlistSelector.innerHTML = '';
+            for (const name in playlistPaths) {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                playlistSelector.appendChild(option);
+            }
+        }
+
+        async function cambiarPlaylist(nombrePlaylist, autoPlayAfterLoad = true) {
+            console.log(`Cambiando a playlist: ${nombrePlaylist}`);
+            currentPlaylistName = nombrePlaylist;
+            localStorage.setItem('lastPlaylist', nombrePlaylist); // Guardar la última playlist
+            scheduledPlaylistInfo.textContent = ''; // Limpiar mensaje de playlist programada
+
+            const path = playlistPaths[nombrePlaylist];
+            if (!path) {
+                console.error(`Ruta no encontrada para la playlist: ${nombrePlaylist}`);
+                cancionesActuales = [];
+                cargarPista(0); // Mostrar mensaje de no hay canciones
+                return;
+            }
+
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                cancionesActuales = data;
+                actual = 0; // Reiniciar al inicio de la nueva playlist
+                songsSinceLastAd = 0; // Reiniciar contador de anuncios
+                console.log("[cambiarPlaylist] Reiniciando contador de anuncios al cambiar de playlist.");
+
+                if (isShuffleMode) {
+                    shufflePlaylist();
+                    cargarPista(actual, autoPlayAfterLoad);
+                } else {
+                    cargarPista(actual, autoPlayAfterLoad);
+                }
+            } catch (error) {
+                console.error("Error al cargar la playlist:", error);
+                titulo.textContent = "Error al cargar la playlist";
+                artista.textContent = "Verifica la consola para más detalles.";
+                cancionesActuales = []; // Vaciar playlist en caso de error
+                audio.pause();
+                audio.src = "";
+                updatePlayPauseButton();
+                songListElement.innerHTML = '<li><span class="song-title">Error al cargar.</span></li>'; 
+            }
+        }
+
+        // --- Funciones de Administración de Horarios ---
+        function loadSchedule() {
+            const savedSchedule = localStorage.getItem(LOCAL_STORAGE_KEY_SCHEDULE);
+            if (savedSchedule) {
+                horarioProgramado = JSON.parse(savedSchedule);
+            } else {
+                horarioProgramado = []; // Asegurarse de que sea un array vacío si no hay nada guardado
+            }
+            renderScheduleList();
+            checkAndApplyScheduledPlaylist();
+        }
+
+        function saveSchedule() {
+            localStorage.setItem(LOCAL_STORAGE_KEY_SCHEDULE, JSON.stringify(horarioProgramado));
+        }
+
+        function renderScheduleList() {
+            scheduleListElement.innerHTML = '';
+            horarioProgramado.forEach((schedule, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <label>Hora:</label>
+                    <input type="time" value="${schedule.time}" onchange="updateScheduleTime(${index}, this.value)">
+                    <label>Playlist:</label>
+                    <select onchange="updateSchedulePlaylist(${index}, this.value)">
+                        ${Object.keys(playlistPaths).map(name => 
+                            `<option value="${name}" ${schedule.playlist === name ? 'selected' : ''}>${name}</option>`
+                        ).join('')}
+                    </select>
+                    <button class="delete-btn" onclick="deleteScheduleEntry(${index})">Eliminar</button>
+                `;
+                scheduleListElement.appendChild(li);
+            });
+        }
+
+        function añadirNuevaFranja() {
+            horarioProgramado.push({ time: "08:00", playlist: Object.keys(playlistPaths)[0] || "" });
+            saveSchedule();
+            renderScheduleList();
+        }
+
+        function updateScheduleTime(index, newTime) {
+            horarioProgramado[index].time = newTime;
+            saveSchedule();
+            checkAndApplyScheduledPlaylist(); // Re-evaluar horarios
+        }
+
+        function updateSchedulePlaylist(index, newPlaylist) {
+            horarioProgramado[index].playlist = newPlaylist;
+            saveSchedule();
+            checkAndApplyScheduledPlaylist(); // Re-evaluar horarios
+        }
+
+        function deleteScheduleEntry(index) {
+            horarioProgramado.splice(index, 1);
+            saveSchedule();
+            renderScheduleList();
+            checkAndApplyScheduledPlaylist(); // Re-evaluar horarios
+        }
+
+        let scheduleCheckInterval; // Para guardar el ID del intervalo
+        function startScheduleCheck() {
+            if (scheduleCheckInterval) {
+                clearInterval(scheduleCheckInterval); // Limpiar el intervalo anterior si existe
+            }
+            // Comprobar cada minuto (60,000 ms)
+            scheduleCheckInterval = setInterval(checkAndApplyScheduledPlaylist, 60000); 
+            console.log("Comprobación de horarios iniciada.");
+        }
+
+        function checkAndApplyScheduledPlaylist() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            // Ordenar el horario por tiempo para aplicar el más reciente
+            horarioProgramado.sort((a, b) => {
+                const [hA, mA] = a.time.split(':').map(Number);
+                const [hB, mB] = b.time.split(':').map(Number);
+                if (hA !== hB) return hA - hB;
+                return mA - mB;
+            });
+
+            let playlistToApply = null;
+            let scheduledPlaylistText = "Ninguna playlist programada para ahora.";
+
+            for (let i = horarioProgramado.length - 1; i >= 0; i--) {
+                const schedule = horarioProgramado[i];
+                const [schHour, schMinute] = schedule.time.split(':').map(Number);
+
+                // Si la hora programada es igual o anterior a la actual
+                if (schHour < currentHour || (schHour === currentHour && schMinute <= currentMinute)) {
+                    playlistToApply = schedule.playlist;
+                    scheduledPlaylistText = `Actualmente programado: ${schedule.playlist} desde las ${schedule.time}`;
+                    break; 
+                }
+            }
+
+            // Si hay una playlist programada y no es la que ya está sonando
+            if (playlistToApply && currentPlaylistName !== playlistToApply) {
+                console.log(`[Horario] Cambiando a playlist programada: ${playlistToApply}`);
+                cambiarPlaylist(playlistToApply, true); // Cambiar y reproducir automáticamente
+                // Actualizar el selector para reflejar la playlist programada
+                playlistSelector.value = playlistToApply;
+                esReproduccionManual = false; // El cambio fue por horario, no manual
+            } else if (!playlistToApply && currentPlaylistName) {
+                // Si no hay ninguna playlist programada para esta hora y estábamos en una, quizás volvemos a la última manual o predeterminada
+                // En este caso, simplemente no cambiamos la playlist, pero actualizamos el texto.
+                console.log("[Horario] No hay playlist programada para ahora. Manteniendo la actual.");
+            }
+
+            scheduledPlaylistInfo.textContent = scheduledPlaylistText;
+        }
+
+        function volverAHorario() {
+            esReproduccionManual = false;
+            checkAndApplyScheduledPlaylist();
+            console.log("[Volver a Horario] Volviendo a la playlist determinada por el horario.");
+        }
+
+        // --- Carga inicial y Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            populatePlaylistSelector();
+            loadVolume(); // Cargar el volumen al inicio
+            
+            // Cargar la última playlist guardada o una predeterminada
+            const lastPlaylist = localStorage.getItem('lastPlaylist');
+            const initialPlaylist = lastPlaylist && playlistPaths[lastPlaylist] ? lastPlaylist : Object.keys(playlistPaths)[0];
+            
+            // Cargar el modo de reproducción guardado
+            const savedPlaybackMode = localStorage.getItem(LOCAL_STORAGE_KEY_PLAYBACK_MODE);
+            if (savedPlaybackMode === 'shuffle') {
+                isShuffleMode = true;
+            } else {
+                isShuffleMode = false; // Default to sequential if not set or invalid
+            }
+            updatePlaybackModeButtons();
+
+            // Cargar el intervalo de anuncios guardado
+            const savedAdInterval = localStorage.getItem(LOCAL_STORAGE_KEY_AD_INTERVAL);
+            if (savedAdInterval !== null) {
+                AD_INTERVAL_SONGS = parseInt(savedAdInterval);
+                adIntervalInput.value = AD_INTERVAL_SONGS;
+                currentAdIntervalSpan.textContent = AD_INTERVAL_SONGS;
+            }
+
+            setAdIntervalBtn.addEventListener('click', () => {
+                const newInterval = parseInt(adIntervalInput.value);
+                if (!isNaN(newInterval) && newInterval > 0) {
+                    AD_INTERVAL_SONGS = newInterval;
+                    currentAdIntervalSpan.textContent = newInterval;
+                    localStorage.setItem(LOCAL_STORAGE_KEY_AD_INTERVAL, newInterval);
+                    alert(`Intervalo de anuncios actualizado a cada ${newInterval} canciones.`);
+                } else {
+                    alert("Por favor, introduce un número válido mayor que 0.");
+                }
+            });
+            
+            // Para asegurar que el selector refleje la playlist cargada inicialmente
+            playlistSelector.value = initialPlaylist;
+
+            // Cargar playlist inicial y luego el horario
+            cambiarPlaylist(initialPlaylist, false).then(() => { // No reproducir automáticamente al inicio
+                loadSchedule(); // Cargar y renderizar horarios
+                startScheduleCheck(); // Iniciar la comprobación de horarios
+                // Solo auto-reproducir si la última sesión estaba reproduciendo O si hay un horario que lo indique
+                // En este caso, el `checkAndApplyScheduledPlaylist` se encargará de la reproducción
+                // si detecta un cambio por horario. Para el inicio, mejor que sea manual.
+            });
+        });
+
+    </script>
+</body>
+</html>

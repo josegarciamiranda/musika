@@ -1,0 +1,42 @@
+[
+  {
+    "titulo": "Bohemian Rhapsody",
+    "artista": "Queen",
+    "archivo": "clasicos/Bohemian Rhapsody.mp3"
+  },
+  {
+    "titulo": "California Dreamin'",
+    "artista": "The Mamas & The Papas",
+    "archivo": "clasicos/California Dreamin'.mp3"
+  },
+  {
+    "titulo": "Carry On Wayward Son",
+    "artista": "Kansas",
+    "archivo": "clasicos/Carry On Wayward Son.mp3"
+  },
+  {
+    "titulo": "Cocaine",
+    "artista": "Eric Clapton",
+    "archivo": "clasicos/Cocaine.mp3"
+  },
+  {
+    "titulo": "Copacabana (At the Copa)",
+    "artista": "Barry Manilow",
+    "archivo": "clasicos/Copacabana (At the Copa).mp3"
+  },
+  {
+    "titulo": "Crocodile Rock",
+    "artista": "Elton John",
+    "archivo": "clasicos/Crocodile Rock.mp3"
+  },
+  {
+    "titulo": "Daddy Cool",
+    "artista": "Boney M.",
+    "archivo": "clasicos/Daddy Cool.mp3"
+  },
+  {
+    "titulo": "Dancing Queen",
+    "artista": "ABBA",
+    "archivo": "clasicos/Dancing Queen.mp3"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "titulo": "2 Times",
+    "artista": "Ann Lee",
+    "archivo": "pop_actual/2 Times.mp3"
+  },
+  {
+    "titulo": "All That She Wants",
+    "artista": "Ace of Base",
+    "archivo": "pop_actual/All That She Wants.mp3"
+  },
+  {
+    "titulo": "Another Night",
+    "artista": "Real McCoy",
+    "archivo": "pop_actual/Another Night.mp3"
+  },
+  {
+    "titulo": "Barbie Girl",
+    "artista": "Aqua",
+    "archivo": "pop_actual/Barbie Girl.mp3"
+  },
+  {
+    "titulo": "Believe",
+    "artista": "Cher",
+    "archivo": "pop_actual/Believe.mp3"
+  },
+  {
+    "titulo": "Black or White",
+    "artista": "Michael Jackson",
+    "archivo": "pop_actual/Black or White.mp3"
+  },
+  {
+    "titulo": "Blame It on the Rain",
+    "artista": "Milli Vanilli",
+    "archivo": "pop_actual/Blame It on the Rain.mp3"
+  },
+  {
+    "titulo": "Blue (Da Ba Dee)",
+    "artista": "Eiffel 65/Gabry Ponte",
+    "archivo": "pop_actual/Blue (Da Ba Dee).mp3"
+  },
+  {
+    "titulo": "Don't Speak",
+    "artista": "No Doubt",
+    "archivo": "pop_actual/Don't Speak.mp3"
+  },
+  {
+    "titulo": "Dreams",
+    "artista": "The Cranberries",
+    "archivo": "pop_actual/Dreams.mp3"
+  }
+]
