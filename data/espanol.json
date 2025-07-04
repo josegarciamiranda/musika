@@ -1,0 +1,47 @@
+[
+  {
+    "titulo": "Baracunatana",
+    "artista": "Aterciopelados",
+    "archivo": "espanol/Aterciopelados - Baracunatana.mp3"
+  },
+  {
+    "titulo": "Celos",
+    "artista": "Daniela Romo",
+    "archivo": "espanol/Daniela Romo - Celos.mp3"
+  },
+  {
+    "titulo": "Como Pudiste Hacerme Esto A Mí",
+    "artista": "Alaska y Dinarama",
+    "archivo": "espanol/Alaska y Dinarama - Como Pudiste Hacerme Esto A Mí.mp3"
+  },
+  {
+    "titulo": "El Universo Sobre Mi",
+    "artista": "Amaral",
+    "archivo": "espanol/Amaral - El Universo Sobre Mi.mp3"
+  },
+  {
+    "titulo": "Embrujada",
+    "artista": "Casal",
+    "archivo": "espanol/Casal - Embrujada.mp3"
+  },
+  {
+    "titulo": "Eres",
+    "artista": "Cafe Tacuba",
+    "archivo": "espanol/Cafe Tacuba - Eres.mp3"
+  },
+  {
+    "titulo": "Loco",
+    "artista": "Andres Calamaro",
+    "archivo": "espanol/Andres Calamaro - Loco.MP3"
+  },
+  {
+    "titulo": "No Voy en Tren",
+    "artista": "Charly Garcia",
+    "archivo": "espanol/Charly Garcia - No Voy En Tren.mp3"
+  },
+  {
+    "titulo": "Pongamos Que Hablo De Madrid",
+    "artista": "Antonio Flores",
+    "archivo": "espanol/Antonio Flores - Pongamos Que Hablo De Madrid.mp3"
+  }
+]
