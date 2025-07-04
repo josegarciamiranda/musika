@@ -6,6 +6,7 @@
     <title>Reproductor de Música Ambiental - Beta</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* Estilos CSS originales */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
@@ -609,16 +610,28 @@
 
     <script>
         // Mapeo de nombres de playlist a sus archivos JSON
+        // Asegúrate de que estos archivos (e.g., clasicos.json, espanol.json, pop-actual.json)
+        // existan en una carpeta llamada 'data/' en el mismo directorio que este index.html.
+        // Ejemplo:
+        // tu_proyecto/
+        // ├── index.html
+        // ├── data/
+        // │   ├── clasicos.json
+        // │   ├── espanol.json
+        // │   └── pop-actual.json
+        // └── anuncios/
+        //     ├── anuncio_kasimu_1.mp3
+        //     ├── anuncio_patrocinador_a.mp3
+        //     └── anuncio_promocion.mp3
         const playlistPaths = {
             "Clásicos de Siempre": "data/clasicos.json",
             "Éxitos en Español": "data/espanol.json",
-            "Pop Actual": "data/pop-actual.json" // <--- NUEVA LÍNEA AÑADIDA AQUÍ
-            // AÑADE AQUÍ TUS OTRAS PLAYLISTS CUANDO LAS TENGAS LISTAS, por ejemplo:
-            // "Rock Clásico": "data/rock_clasico.json",
-            // "Bandas Sonoras": "data/bandas_sonoras.json"
+            "Pop Actual": "data/pop-actual.json" 
         };
 
         // RUTAS DE ANUNCIOS - ¡APUNTANDO A LA CARPETA 'anuncios/'!
+        // Asegúrate de que los archivos MP3 de anuncios existan en una carpeta llamada 'anuncios/'
+        // en el mismo directorio que este index.html.
         const anuncios = [
             "anuncios/anuncio_kasimu_1.mp3",
             "anuncios/anuncio_patrocinador_a.mp3",
@@ -675,7 +688,7 @@
             if (!cancionesActuales || cancionesActuales.length === 0) {
                 if (!isPlayingAd) {
                     titulo.textContent = "No hay canciones disponibles";
-                    artista.textContent = "Por favor, selecciona una playlist o carga una.";
+                    artista.textContent = "Por favor, asegúrate de que los archivos de las playlists existan y se puedan cargar.";
                     audio.pause();
                     audio.src = "";
                     updatePlayPauseButton();
@@ -713,8 +726,8 @@
                 pistaACargar = cancionesActuales[actual];
                 console.log(`[cargarPista] Modo secuencial. Pista: ${pistaACargar ? pistaACargar.titulo : 'N/A'}`);
             } else {
-                titulo.textContent = "No hay canciones disponibles"; // Esto solo debería ocurrir si cancionesActuales se vuelve vacío
-                artista.textContent = "";
+                titulo.textContent = "No hay canciones disponibles"; 
+                artista.textContent = "Por favor, asegúrate de que los archivos de las playlists existan y se puedan cargar.";
                 audio.pause();
                 audio.src = "";
                 updatePlayPauseButton();
@@ -732,8 +745,13 @@
             audio.load();
 
             if (autoPlay) {
+                // Nota sobre autoplay: Los navegadores modernos a menudo bloquean la reproducción automática
+                // de audio con sonido a menos que el usuario interactúe primero con la página.
+                // Si la reproducción automática no funciona, es probable que se deba a esta política del navegador.
                 audio.play().catch(e => {
                     console.error("Error al intentar reproducir (cargarPista):", e);
+                    // Opcional: mostrar un mensaje al usuario si la reproducción automática falla.
+                    // alert("El navegador ha bloqueado la reproducción automática. Por favor, haz clic en 'Reproducir'.");
                 });
             }
             updatePlayPauseButton();
@@ -749,7 +767,7 @@
             if (audio.paused) {
                 audio.play().catch(e => {
                     console.error("Error al intentar reproducir (togglePlay):", e);
-                    alert("No se pudo reproducir la pista.");
+                    alert("No se pudo reproducir la pista. El navegador podría estar bloqueando la reproducción automática.");
                 });
             } else {
                 audio.pause();
@@ -913,9 +931,11 @@
             audio.load();
             audio.play().catch(e => {
                 console.error("Error al reproducir anuncio:", e);
-                isPlayingAd = false; // Si falla el anuncio, volver al modo normal
+                // Si falla el anuncio, volver al modo normal y tratar de reproducir la siguiente canción.
+                isPlayingAd = false; 
                 adStatusIndicator.style.display = 'none';
-                siguiente(); // Y tratar de reproducir la siguiente canción
+                siguiente(); 
+                alert("Error al reproducir el anuncio. Asegúrate de que los archivos MP3 de anuncios existan en la carpeta 'anuncios/'.");
             });
             updatePlayPauseButton();
             generarListaCanciones(); // Actualizar la lista para mostrar "Publicidad en curso"
@@ -1029,7 +1049,11 @@
             try {
                 const response = await fetch(path);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    let errorMessage = `Error HTTP al cargar la playlist: ${response.status} ${response.statusText}.`;
+                    if (response.status === 404) {
+                        errorMessage += " Asegúrate de que el archivo JSON de la playlist exista en la ruta correcta.";
+                    }
+                    throw new Error(errorMessage);
                 }
                 const data = await response.json();
                 cancionesActuales = data;
@@ -1046,12 +1070,14 @@
             } catch (error) {
                 console.error("Error al cargar la playlist:", error);
                 titulo.textContent = "Error al cargar la playlist";
-                artista.textContent = "Verifica la consola para más detalles.";
+                artista.textContent = error.message || "Verifica la consola para más detalles. Podría ser un problema de ruta o de servidor local (CORS).";
                 cancionesActuales = []; // Vaciar playlist en caso de error
                 audio.pause();
                 audio.src = "";
                 updatePlayPauseButton();
                 songListElement.innerHTML = '<li><span class="song-title">Error al cargar.</span></li>'; 
+                // Alerta para el usuario sobre posibles problemas de carga
+                alert(`Error: No se pudo cargar la playlist "${nombrePlaylist}".\n\nPosibles razones:\n1. Los archivos de las playlists (JSON) no están en la carpeta 'data/' relativa a este archivo (e.g., tu_proyecto/data/clasicos.json).\n2. Estás abriendo el archivo HTML directamente desde tu disco duro (file://) y el navegador bloquea la carga de archivos locales. Intenta usar un servidor local (como 'Live Server' en VS Code o similar) para servir el archivo.\n\nDetalles del error: ${error.message}`);
             }
         }
 
@@ -1161,8 +1187,7 @@
                 playlistSelector.value = playlistToApply;
                 esReproduccionManual = false; // El cambio fue por horario, no manual
             } else if (!playlistToApply && currentPlaylistName) {
-                // Si no hay ninguna playlist programada para esta hora y estábamos en una, quizás volvemos a la última manual o predeterminada
-                // En este caso, simplemente no cambiamos la playlist, pero actualizamos el texto.
+                // Si no hay ninguna playlist programada para esta hora y estábamos en una, simplemente actualizamos el texto.
                 console.log("[Horario] No hay playlist programada para ahora. Manteniendo la actual.");
             }
 
@@ -1220,9 +1245,9 @@
             cambiarPlaylist(initialPlaylist, false).then(() => { // No reproducir automáticamente al inicio
                 loadSchedule(); // Cargar y renderizar horarios
                 startScheduleCheck(); // Iniciar la comprobación de horarios
-                // Solo auto-reproducir si la última sesión estaba reproduciendo O si hay un horario que lo indique
-                // En este caso, el `checkAndApplyScheduledPlaylist` se encargará de la reproducción
-                // si detecta un cambio por horario. Para el inicio, mejor que sea manual.
+                // El `checkAndApplyScheduledPlaylist` se encargará de la reproducción
+                // si detecta un cambio por horario. Para el inicio, la reproducción
+                // automática podría ser bloqueada por el navegador si no hay interacción previa.
             });
         });
 
