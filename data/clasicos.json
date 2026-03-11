@@ -1,5 +1,60 @@
 [
   {
+    "titulo": "A Kind Of Magic",
+    "artista": "Queen",
+    "archivo": "canciones/clasicos/A Kind Of Magic.mp3"
+  },
+  {
+    "titulo": "A View to a Kill",
+    "artista": "Duran Duran",
+    "archivo": "canciones/clasicos/A View to a Kill.mp3"
+  },
+  {
+    "titulo": "Abracadabra",
+    "artista": "Steve Miller Band",
+    "archivo": "canciones/clasicos/Abracadabra.mp3"
+  },
+  {
+    "titulo": "Addicted To Love",
+    "artista": "Robert Palmer",
+    "archivo": "canciones/clasicos/Addicted To Love.mp3"
+  },
+  {
+    "titulo": "Africa",
+    "artista": "TOTO",
+    "archivo": "canciones/clasicos/Africa.mp3"
+  },
+  {
+    "titulo": "All Night Long (All Night)",
+    "artista": "Lionel Richie",
+    "archivo": "canciones/clasicos/All Night Long (All Night).mp3"
+  },
+  {
+    "titulo": "All the Love in the World",
+    "artista": "The Outfield",
+    "archivo": "canciones/clasicos/All the Love in the World.mp3"
+  },
+  {
+    "titulo": "Allentown",
+    "artista": "Billy Joel",
+    "archivo": "canciones/clasicos/Allentown.mp3"
+  },
+  {
+    "titulo": "Always",
+    "artista": "Erasure",
+    "archivo": "canciones/clasicos/Always.mp3"
+  },
+  {
+    "titulo": "Always on My Mind",
+    "artista": "Pet Shop Boys",
+    "archivo": "canciones/clasicos/Always on My Mind.mp3"
+  },
+  {
+    "titulo": "Another One Bites The Dust",
+    "artista": "Queen",
+    "archivo": "canciones/clasicos/Another One Bites The Dust.mp3"
+  },
+  {
     "titulo": "Bohemian Rhapsody",
     "artista": "Queen",
     "archivo": "canciones/clasicos/Bohemian Rhapsody.mp3"
